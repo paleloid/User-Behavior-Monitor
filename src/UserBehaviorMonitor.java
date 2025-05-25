@@ -3,6 +3,8 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.io.*;
 import java.nio.file.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
@@ -112,35 +114,46 @@ public class UserBehaviorMonitor {
         realtimeTimer = new Timer(true);
         realtimeTimer.schedule(new TimerTask() {
             public void run() {
-                monitorFailedLogonsRealtime();
                 monitorSuspiciousProcessesRealtime();
+                monitorFailedLogonsRealtime();
             }
         }, 0, 10000); // 10 seconds
     }
+
+    private DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    private LocalDateTime lastFailedLogonCheckTime = LocalDateTime.MIN;
 
     private void monitorFailedLogonsRealtime() {
         Map<String, Integer> userAttempts = new HashMap<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(FAILED_LOGON_TODAY))) {
             String line;
-            boolean skip = true;
+            boolean skipHeader = true;
             while ((line = reader.readLine()) != null) {
-                if (skip) { skip = false; continue; }
+                if (skipHeader) { skipHeader = false; continue; }
                 String[] parts = line.split(",");
                 if (parts.length > 1) {
-                    String user = parts[1].trim();
-                    userAttempts.put(user, userAttempts.getOrDefault(user, 0) + 1);
+                    LocalDateTime time = LocalDateTime.parse(parts[0].trim(), formatter);
+                    if (time.isAfter(lastFailedLogonCheckTime)) {
+                        String user = parts[1].trim();
+                        userAttempts.put(user, userAttempts.getOrDefault(user, 0) + 1);
+                    }
                 }
             }
+
             for (Map.Entry<String, Integer> entry : userAttempts.entrySet()) {
                 if (entry.getValue() >= loginThreshold) {
                     disableUser(entry.getKey());
-                    notifyUser("[ACTION] Disabled user: " + entry.getKey() + " after failed logins.");
+                    notifyUser("[ACTION] Disabled user: " + entry.getKey() + " after " + loginThreshold + " failed logins.");
                 }
             }
+
+            lastFailedLogonCheckTime = LocalDateTime.now();
         } catch (IOException e) {
             notifyUser("[ERROR] Real-time failed logon: " + e.getMessage());
         }
     }
+
+    private LocalDateTime lastSuspiciousPrecessCheckTime = LocalDateTime.MIN;
 
     private void monitorSuspiciousProcessesRealtime() {
         try (BufferedReader reader = new BufferedReader(new FileReader(SUSPICIOUS_PROC_TODAY))) {
@@ -148,15 +161,16 @@ public class UserBehaviorMonitor {
             boolean skip = true;
             while ((line = reader.readLine()) != null) {
                 if (skip) { skip = false; continue; }
-                if (!seenProcesses.contains(line)) {
-                    seenProcesses.add(line);
                     String[] parts = line.split(",");
                     if (parts.length > 2) {
-                        String proc = parts[2].trim();
-                        notifyUser("[ALERT] Suspicious process detected: " + proc);
+                        LocalDateTime time = LocalDateTime.parse(parts[0].trim(), formatter);
+                        if (time.isAfter(lastSuspiciousPrecessCheckTime)) {
+                            String proc = parts[1].trim();
+                            notifyUser("[ALERT] Suspicious process detected: " + proc);
+                        }
                     }
-                }
             }
+            lastSuspiciousPrecessCheckTime = LocalDateTime.now();
         } catch (IOException e) {
             notifyUser("[ERROR] Suspicious process check: " + e.getMessage());
         }
@@ -173,8 +187,10 @@ public class UserBehaviorMonitor {
     }
 
     private void notifyUser(String message) {
-        notificationArea.append(message + "\n");
-        Toolkit.getDefaultToolkit().beep();
+        SwingUtilities.invokeLater(() -> {
+            notificationArea.append(message + "\n");
+            Toolkit.getDefaultToolkit().beep();
+        });
     }
 
     private void loadSuspiciousPrograms() {

@@ -1,0 +1,11 @@
+TimeCreated,User,CommandLine
+2025-05-25T12:16:00,admin,C:\Users\Public\mimikatz.exe -arg0
+2025-05-25T12:11:00,alice,C:\Users\admin\Downloads\mimikatz.exe -arg1
+2025-05-25T12:06:00,jdoe,C:\Temp\procdump.exe -arg2
+2025-05-25T12:01:00,jdoe,C:\Users\admin\Downloads\netcat.exe -arg3
+2025-05-25T11:56:00,carol,C:\Users\admin\Downloads\netcat.exe -arg4
+2025-05-25T11:51:00,bob,C:\Users\admin\Downloads\netcat.exe -arg5
+2025-05-25T11:46:00,alice,C:\Temp\mimikatz.exe -arg6
+2025-05-25T11:41:00,admin,C:\Users\Public\procdump.exe -arg7
+2025-05-25T11:36:00,bob,C:\Tools\procdump.exe -arg8
+2025-05-25T11:31:00,alice,C:\Users\Public\mimikatz.exe -arg9

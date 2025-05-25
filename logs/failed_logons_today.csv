@@ -1,0 +1,11 @@
+TimeCreated,UserName,Workstation,IPAddress,FailureReason
+2025-05-25T14:22:00,admin,WS-01,192.168.1.100,"Unknown user name or bad password"
+2025-05-25T14:16:00,alice,PC-ALICE,203.0.113.10,"Account locked out"
+2025-05-25T14:10:00,guest,GUEST-PC,10.0.0.50,"Logon not allowed on this workstation"
+2025-05-25T14:04:00,bob,LAPTOP-007,198.51.100.33,"User account expired"
+2025-05-25T13:58:00,jdoe,WS-02,172.16.4.25,"Unknown user name or bad password"
+2025-05-25T13:52:00,carol,WS-01,192.168.1.100,"Logon not allowed at this time"
+2025-05-25T13:46:00,admin,PC-ALICE,203.0.113.10,"Account locked out"
+2025-05-25T13:40:00,bob,WS-02,198.51.100.33,"Logon not allowed at this time"
+2025-05-25T13:34:00,guest,GUEST-PC,10.0.0.50,"Unknown user name or bad password"
+2025-05-25T13:28:00,carol,LAPTOP-007,172.16.4.25,"User account expired"
